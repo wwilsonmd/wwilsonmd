@@ -23,7 +23,7 @@ I'm passionate about cybersecurity and love tackling complex challenges through 
 
 [twitter]: https://twitter.com/___________
 [youtube]: https://www.youtube.com/c/___________
-[instagram]: https://www.instagram.com/miwilson4281________
+[instagram]: https://www.instagram.com/miwilson4281
 [linkedin]: https://linkedin.com/in/wwilsonmd
 
 <!--
