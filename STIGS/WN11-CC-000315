@@ -1,0 +1,45 @@
+<#
+.SYNOPSIS
+    This PowerShell script disables the insecure Windows Installer setting that allows elevated privilege installs by setting the AlwaysInstallElevated policy to 0 in both machine-wide (HKLM) and user-specific (HKCU) registry locations.
+
+.NOTES
+    Author          : Michael Wilson
+    LinkedIn        : linkedin.com/in/wwilsonmd/
+    GitHub          : github.com/wwilsonmd/wwilsonmd
+    Date Created    : 2026-04-08
+    Last Modified   : 2026-04-08
+    Version         : 1.0
+    CVEs            : N/A
+    Plugin IDs      : N/A
+    STIG-ID         : WN11-CC-000315
+
+.TESTED ON
+    Date(s) Tested  : 
+    Tested By       : 
+    Systems Tested  : 
+    PowerShell Ver. : 
+
+.USAGE
+    Put any usage instructions here.
+    Example syntax:
+    PS C:\> .\__remediation_template(STIG-ID-WN11-AU-000500).ps1 
+#>
+
+# YOUR CODE GOES HERE
+
+
+
+
+
+
+# Disable "Always install with elevated privileges"
+$machinePath = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Installer'
+$userPath    = 'HKCU:\SOFTWARE\Policies\Microsoft\Windows\Installer'
+
+# Create keys if they do not exist
+New-Item -Path $machinePath -Force | Out-Null
+New-Item -Path $userPath -Force | Out-Null
+
+# Set AlwaysInstallElevated to 0 (Disabled)
+New-ItemProperty -Path $machinePath -Name 'AlwaysInstallElevated' -PropertyType DWord -Value 0 -Force | Out-Null
+New-ItemProperty -Path $userPath -Name 'AlwaysInstallElevated' -PropertyType DWord -Value 0 -Force | Out-Null
