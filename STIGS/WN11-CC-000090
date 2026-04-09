@@ -1,0 +1,40 @@
+<#
+.SYNOPSIS
+This script configures Windows to always reprocess Group Policy objects—even when no changes are detected—by setting the required registry value (`NoGPOListChanges = 0`) at the correct policy path.
+
+.NOTES
+    Author          : Michael Wilson
+    LinkedIn        : linkedin.com/in/wwilsonmd/
+    GitHub          : github.com/wwilsonmd/wwilsonmd
+    Date Created    : 2026-04-09
+    Last Modified   : 2026-04-09
+    Version         : 1.0
+    CVEs            : N/A
+    Plugin IDs      : N/A
+    STIG-ID         :WN11-CC-000090.ps1
+
+.TESTED ON
+    Date(s) Tested  : 
+    Tested By       : 
+    Systems Tested  : 
+    PowerShell Ver. : 
+
+.USAGE
+    Put any usage instructions here.
+    Example syntax:
+    PS C:\> .\__remediation_template(STIG-ID-WN11-CC-000090).ps1 
+#>
+
+# YOUR CODE GOES HERE
+
+#WN-CC-000090
+# Configure registry policy processing:
+# Enabled + "Process even if the Group Policy objects have not changed"
+
+$path = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows\Group Policy\{35378EAC-683F-11D2-A89A-00C04FBBCFA2}'
+
+# Create the key if it does not exist
+New-Item -Path $path -Force | Out-Null
+
+# Set the required value
+New-ItemProperty -Path $path -Name 'NoGPOListChanges' -PropertyType DWord -Value 0 -Force | Out-Null
