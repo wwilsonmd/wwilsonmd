@@ -1,0 +1,41 @@
+<#
+.SYNOPSIS
+This script enables secure Remote Desktop communication by requiring RPC traffic encryption through setting the fEncryptRPCTraffic policy to 1 in the registry.
+.NOTES
+    Author          : Michael Wilson
+    LinkedIn        : linkedin.com/in/wwilsonmd/
+    GitHub          : github.com/wwilsonmd/wwilsonmd
+    Date Created    : 2026-04-09
+    Last Modified   : 2026-04-09
+    Version         : 1.0
+    CVEs            : N/A
+    Plugin IDs      : N/A
+    STIG-ID         :WN11-CC-000285.ps1
+
+.TESTED ON
+    Date(s) Tested  : 
+    Tested By       : 
+    Systems Tested  : 
+    PowerShell Ver. : 
+
+.USAGE
+    Put any usage instructions here.
+    Example syntax:
+    PS C:\> .\__remediation_template(STIG-ID-WN11-CC-000285).ps1 
+#>
+
+# YOUR CODE GOES HERE
+
+
+
+
+# WN11-CC-000285
+# Require secure RPC communication for Remote Desktop Session Host
+
+$path = 'HKLM:\SOFTWARE\Policies\Microsoft\Windows NT\Terminal Services'
+
+# Create the key if it does not exist
+New-Item -Path $path -Force | Out-Null
+
+# Set the required value
+New-ItemProperty -Path $path -Name 'fEncryptRPCTraffic' -PropertyType DWord -Value 1 -Force | Out-Null
