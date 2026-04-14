@@ -1,1 +1,369 @@
+# 🛡️ SOC Incident Report
 
+## Incident Title
+
+Business Email Compromise (BEC) via MFA Fatigue – Scattered Spider Attribution
+
+## Incident ID
+
+IR-2026-0225-BEC
+
+## Severity
+
+High
+
+## Status
+
+Contained
+
+## Analyst
+
+[Your Name]
+
+## Date
+
+26 February 2026
+
+---
+
+# 📌 Executive Summary
+
+On 25 February 2026, LogN Pacific Financial Services experienced a Business Email Compromise (BEC) attack resulting in a fraudulent wire transfer attempt of £24,500. The transaction was flagged and frozen by the receiving bank.
+
+Investigation revealed that the attacker gained access to a finance employee’s account (Mark Smith) using an MFA fatigue (push bombing) attack. The attacker then established persistence via inbox rules, conducted email reconnaissance, and sent a fraudulent invoice email to another internal employee.
+
+The attacker also accessed cloud storage services including OneDrive and SharePoint, expanding the potential impact to include data exposure.
+
+The activity aligns with known TTPs of the threat group **Scattered Spider**.
+
+---
+
+# 🧠 Incident Timeline (UTC)
+
+| Time        | Event                                                  |
+| ----------- | ------------------------------------------------------ |
+| ~21:54      | Multiple failed MFA attempts (MFA fatigue begins)      |
+| ~21:59      | Successful sign-in from attacker IP (205.147.16.190)   |
+| 21:56–21:57 | MailItemsAccessed (initial reconnaissance)             |
+| 22:02       | Inbox rule created (`.`) – forwarding financial emails |
+| 22:03       | Inbox rule created (`..`) – deleting security alerts   |
+| 22:04       | Continued mailbox access and rule execution            |
+| 22:06       | Fraudulent email sent to finance employee              |
+| Post-22:06  | File access observed (OneDrive & SharePoint)           |
+
+---
+
+# 🔍 Technical Findings
+
+## Compromised Account
+
+* User: [m.smith@lognpacific.org](mailto:m.smith@lognpacific.org)
+* Role: Finance
+
+## Initial Access
+
+* Technique: MFA Fatigue (Push Bombing)
+* MITRE: T1621
+
+## Attacker Infrastructure
+
+* IP Address: 205.147.16.190
+* Location: Netherlands (NL)
+* OS: Linux
+* Browser: Firefox 147.0
+
+## Conditional Access
+
+* Status: notApplied
+* Impact: No enforcement of device or location restrictions
+
+---
+
+# 📩 Email Compromise Activity
+
+## First Action
+
+* ActionType: MailItemsAccessed
+* MITRE: T1114 (Email Collection)
+
+## Inbox Rules Created
+
+### Rule 1
+
+* Name: `.`
+* Action: Forward emails
+* Keywords: invoice, payment, wire, transfer
+* ForwardTo: [Attacker-controlled email]
+
+### Rule 2
+
+* Name: `..`
+
+* Action: Delete emails
+
+* Keywords: suspicious, security, phishing, unusual, compromised, verify
+
+* MITRE: T1564.008 (Hide Artifacts – Email Rules)
+
+## Fraudulent Email
+
+* Recipient: [j.reynolds@lognpacific.org](mailto:j.reynolds@lognpacific.org)
+* Subject: RE: Invoice #INV-2026-0892 - Updated Banking Details
+* Direction: IntraOrg
+* Sender IP: 205.147.16.190
+
+---
+
+# 📁 Data Access
+
+## Cloud Applications Accessed
+
+* Microsoft OneDrive for Business (FileAccessed)
+
+* SharePoint Online
+
+* MITRE: T1530 (Data from Cloud Storage)
+
+---
+
+# 🔗 Session Correlation
+
+* AAD Session ID: 00225cfa-a0ff-fb46-a079-5d152fcdf72a
+
+This session ID links:
+
+* Authentication
+* Inbox rule creation
+* Email activity
+* File access
+
+---
+
+# 🧬 Threat Actor Attribution
+
+## Identified Group
+
+Scattered Spider
+
+## Supporting Evidence
+
+* MFA fatigue techniques
+* Use of infostealer-obtained credentials
+* Cloud-native attack methods
+* BEC targeting finance
+* Known targeting of large enterprises
+
+---
+
+# 🛑 Impact Assessment
+
+## Financial
+
+* £24,500 attempted fraud (funds frozen)
+
+## Security
+
+* Email account fully compromised
+* Persistence via inbox rules
+* Internal fraud attempt
+
+## Data Exposure
+
+* Potential access to:
+
+  * Emails
+  * OneDrive files
+  * SharePoint documents
+
+---
+
+# 🚨 Root Cause
+
+1. User approved malicious MFA request
+2. Conditional Access policies not applied
+3. No restrictions on:
+
+   * Unmanaged devices
+   * Foreign sign-ins
+
+---
+
+# 🛡️ Containment Actions
+
+Immediate:
+
+* Revoke active sessions
+* Reset user credentials
+* Remove malicious inbox rules
+
+Follow-up:
+
+* Force password resets for affected users
+* Audit mailbox and file access
+* Monitor for persistence
+
+---
+
+# 🔐 Recommendations
+
+## Identity Security
+
+* Enforce Conditional Access policies
+* Require compliant devices
+* Block high-risk sign-ins
+
+## MFA Hardening
+
+* Implement number matching MFA
+* Enable risk-based authentication
+
+## Email Security
+
+* Monitor inbox rule creation
+* Alert on forwarding to external domains
+
+## Detection Improvements
+
+* Detect MFA fatigue patterns
+* Monitor impossible travel events
+* Correlate session-based activity
+
+---
+
+# 🧠 MITRE ATT&CK Mapping
+
+| Technique                    | ID        |
+| ---------------------------- | --------- |
+| MFA Fatigue                  | T1621     |
+| Valid Accounts               | T1078     |
+| Email Collection             | T1114     |
+| Account Manipulation         | T1098     |
+| Hide Artifacts (Email Rules) | T1564.008 |
+| Data from Cloud Storage      | T1530     |
+
+---
+
+# 🏁 Conclusion
+
+This incident demonstrates a full end-to-end cloud-based BEC attack leveraging MFA fatigue, weak conditional access enforcement, and inbox rule persistence.
+
+The attacker successfully:
+
+* Gained access via social engineering
+* Maintained persistence
+* Executed financial fraud
+* Accessed additional cloud resources
+
+Rapid detection and bank intervention prevented financial loss, but the incident highlights critical gaps in identity protection and monitoring.
+
+---
+
+# 🔍 KQL Query Snippets (Used in Investigation)
+
+## Identify Compromised User
+
+```kusto
+SigninLogs
+| where TimeGenerated between (datetime(2026-02-25 21:00:00) .. datetime(2026-02-25 23:00:00))
+| where UserDisplayName =~ "Mark Smith"
+| distinct UserPrincipalName
+```
+
+## Detect MFA Fatigue Attempts
+
+```kusto
+SigninLogs
+| where UserDisplayName =~ "Mark Smith"
+| where ResultType != 0
+| summarize Attempts=count() by IPAddress
+```
+
+## Identify Attacker IP
+
+```kusto
+SigninLogs
+| where UserDisplayName =~ "Mark Smith"
+| where ResultType == 0
+| summarize count() by IPAddress, LocationDetails
+```
+
+## Inbox Rule Creation Detection
+
+```kusto
+CloudAppEvents
+| where ActionType == "New-InboxRule"
+| extend raw = parse_json(RawEventData)
+| mv-expand params = raw.Parameters
+| project TimeGenerated, tostring(params.Name), tostring(params.Value)
+```
+
+## Identify Fraud Email
+
+```kusto
+EmailEvents
+| where SenderFromAddress has "mark"
+| where Subject has "invoice"
+| project TimeGenerated, RecipientEmailAddress, Subject
+```
+
+---
+
+# 📊 Visual Attack Timeline (Simplified)
+
+```
+[Infostealer Credential Theft]
+            ↓
+[MFA Fatigue Attack]
+            ↓
+[User Approves MFA]
+            ↓
+[Account Compromise]
+            ↓
+[Inbox Rules Created]
+   ├── Forward Financial Emails
+   └── Delete Security Alerts
+            ↓
+[Email Reconnaissance]
+            ↓
+[Fraudulent Invoice Sent]
+            ↓
+[OneDrive & SharePoint Access]
+```
+
+---
+
+# 🎯 Resume Bullet Points
+
+* Conducted full incident response investigation of a Business Email Compromise (BEC) attack using Microsoft Sentinel
+* Identified MFA fatigue attack (T1621) and correlated attacker activity across SigninLogs, CloudAppEvents, and EmailEvents
+* Tracked attacker infrastructure (IP, OS, browser) and detected anomalous sign-in behavior
+* Investigated mailbox persistence via malicious inbox rules (T1564.008)
+* Reconstructed fraud execution including phishing email and targeted finance user
+* Performed cloud data access analysis across OneDrive and SharePoint
+* Mapped attacker techniques to MITRE ATT&CK framework
+* Attributed activity to Scattered Spider threat group based on TTPs
+
+---
+
+# 🧠 Lessons Learned
+
+* MFA alone is not sufficient — users can be socially engineered into approving malicious requests
+* Conditional Access policies must be enforced to block risky sign-ins from unmanaged devices and locations
+* Inbox rule monitoring is critical for detecting stealthy persistence in BEC attacks
+* Internal emails (IntraOrg) bypass traditional email security controls
+* Session-based correlation provides high-confidence attribution across cloud activity
+* Cloud environments require unified visibility across identity, email, and storage logs
+
+---
+
+# 📎 Portfolio Note
+
+This investigation was conducted using Microsoft Sentinel logs (SigninLogs, CloudAppEvents, EmailEvents) in a simulated enterprise environment.
+
+Skills demonstrated:
+
+* Threat hunting (KQL)
+* Incident response
+* Cloud security analysis
+* MITRE ATT&CK mapping
+* Threat actor attribution
